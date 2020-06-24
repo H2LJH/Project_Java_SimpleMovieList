@@ -63,21 +63,17 @@ public class MovieProMain
 		}
 		System.out.println("======================================");
 		System.out.println("보고 싶은 영화 1-10 순위중 한개를 입력하세요.");
-		System.out.print("번호 : ");
 		int userVal = 0;
 		// 유효성 체크
 		while(true)
 		{
+			System.out.print("번호 : ");
 			Scanner sc = new Scanner(System.in);
 			userVal = sc .nextInt();
-			if(userVal > 0 && userVal < 10)
-			{
-				if(mvRank[userVal-1][10] != null)
-					break;
-				else
-					System.out.println("영화 정보 없음");
-			}
-			System.out.print("번호 : ");
+			if((userVal > 0 && userVal < 10) && mvRank[userVal-1][10] != null))
+				break;
+			else
+				System.out.println("영화 정보 없음");
 		}
 		
 		
