@@ -70,7 +70,7 @@ public class MovieProMain
 			System.out.print("번호 : ");
 			Scanner sc = new Scanner(System.in);
 			userVal = sc .nextInt();
-			if((userVal > 0 && userVal < 10) && mvRank[userVal-1][10] != null))
+			if((userVal > 0 && userVal < 10) && mvRank[userVal-1][10] != null)
 				break;
 			else
 				System.out.println("영화 정보 없음");
