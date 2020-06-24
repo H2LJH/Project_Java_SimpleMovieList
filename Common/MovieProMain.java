@@ -83,7 +83,7 @@ public class MovieProMain
 		
 		System.out.println("======================================");
 				
-		return 0;
+		return userVal;
 	}
 	
 	// mvRank 출력하는 코드
