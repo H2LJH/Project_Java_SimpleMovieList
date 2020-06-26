@@ -1,11 +1,14 @@
-package Common;
+package com.mon;
 
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.Scanner;
 
 import com.biz.daum.BoxOfficeDaum;
 import com.biz.naver.NaverBoxoffice;
+import com.biz.naver.ReplyCrawlerNaver;
 
 public class MovieProMain 
 {
@@ -14,11 +17,12 @@ public class MovieProMain
 		BoxOfficeParser bParser = new BoxOfficeParser();  // 생성자 : 객체생성과 동시에 +a 작업을 하고 싶음
 		NaverBoxoffice bon = new NaverBoxoffice();
 		BoxOfficeDaum  don = new BoxOfficeDaum();
+		ReplyCrawlerNaver nCrawler = new ReplyCrawlerNaver();
 		
 		// 순위, 영화제목, 예매율, 장르, 상영시간, 개봉일자, 감독, 출연진, 누적관객수, 누적매출액, 네이버코드, 다음코드
 		String[][] mvRank = new String[10][12];
 		
-		// 1. 박스오피스 정보 + 네이버 영화정보 + 다음 영화정보 (1~10위)
+		// 1. 박스오피스 정보 + 네이버 영화정보 + 다음 영화정보 (1-10위)
 		
 		// 1-1 BoxOffice Parsing 
 		mvRank = bParser.getParser();
@@ -30,10 +34,27 @@ public class MovieProMain
 		mvRank = don.daumMovieRank(mvRank);
 
 		// View
-		userInterface(mvRank);
+		int userVal = userInterface(mvRank);
 		
+		// NaverReply Crawling
+		HashMap<String, Integer> nMap = nCrawler.naverCrawler(mvRank[userVal-1][1], mvRank[userVal-1][10]);
 		
-	
+		// 4. 사용자에게 결과 출력
+		double avgNaver = (double)(nMap.get("total")) / (double)(nMap.get("cnt"));
+		DecimalFormat threeDot = new DecimalFormat("###,###");
+		
+		System.out.println("영화 제목 : "  + mvRank[userVal-1][1] + "\n");
+		System.out.println("예매율 : "        + mvRank[userVal-1][2] + "%");
+		System.out.println("장르 : "          + mvRank[userVal-1][3]);
+		System.out.println("상영 시간 : "     + mvRank[userVal-1][4]);
+		System.out.println("개봉 일자 : "     + mvRank[userVal-1][5]);
+		System.out.println("감독 : "          + mvRank[userVal-1][6]);
+		System.out.println("출연진 : "        + mvRank[userVal-1][7]);
+		System.out.println("누적 관객수 : "   + threeDot.format(Integer.parseInt(mvRank[userVal-1][8])) + "명");
+		System.out.println("누적 매출액 : "   + threeDot.format(Integer.parseInt(mvRank[userVal-1][9])) + "원");
+		System.out.println("네이버 댓글수 : " + nMap.get("cnt") + "건");
+		System.out.printf("네이버 평균 평점 : %.1f점\n",  avgNaver);
+		System.out.println("=============================================");
 	}
 	
 	
@@ -70,15 +91,16 @@ public class MovieProMain
 			System.out.print("번호 : ");
 			Scanner sc = new Scanner(System.in);
 			userVal = sc .nextInt();
+			sc.close();
+			
 			if((userVal > 0 && userVal < 10) && mvRank[userVal-1][10] != null)
 				break;
+			
 			else
 				System.out.println("영화 정보 없음");
 		}
 		
-		
 		System.out.println("======================================");
-				
 		return userVal;
 	}
 	

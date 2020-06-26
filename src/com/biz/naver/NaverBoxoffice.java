@@ -16,8 +16,8 @@ public class NaverBoxoffice
 		Elements movieList = doc.select("div.lst_wrap > ul > li");
 		
 		String title = ""; // 제목
-		String score = ""; // 평점
-		String score2 = ""; // 참여자
+		//String score = ""; // 평점
+		//String score2 = ""; // 참여자
 		String rate = ""; // 예매율
 		String type = ""; // 장르
 		String time = ""; // 상영시간
@@ -101,9 +101,9 @@ public class NaverBoxoffice
 				// ============================================================= 
 				 
 				title = movie.select("dt > a").text(); 
-				score = movie.select("span.num").get(0).text();
-				score2 = movie.select("span.num2 > em").get(0).text();
 				type = movie.select("span.link_txt").get(0).text();
+				//score = movie.select("span.num").get(0).text();
+				//score2 = movie.select("span.num2 > em").get(0).text();
 				 
 				mvRank[flag][2] = rate;
 				mvRank[flag][3] = type;
