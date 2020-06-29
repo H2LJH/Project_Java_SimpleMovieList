@@ -1,5 +1,6 @@
 package com.mon;
 
+import java.math.BigInteger;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -7,8 +8,10 @@ import java.util.HashMap;
 import java.util.Scanner;
 
 import com.biz.daum.BoxOfficeDaum;
+import com.biz.daum.ReplyCrawlerDaum;
 import com.biz.naver.NaverBoxoffice;
 import com.biz.naver.ReplyCrawlerNaver;
+import com.biz.persistance.ReplyDAO;
 
 public class MovieProMain 
 {
@@ -18,6 +21,8 @@ public class MovieProMain
 		NaverBoxoffice bon = new NaverBoxoffice();
 		BoxOfficeDaum  don = new BoxOfficeDaum();
 		ReplyCrawlerNaver nCrawler = new ReplyCrawlerNaver();
+		ReplyCrawlerDaum  dCrawler = new ReplyCrawlerDaum();
+		ReplyDAO rDAO = new ReplyDAO();
 		
 		// 순위, 영화제목, 예매율, 장르, 상영시간, 개봉일자, 감독, 출연진, 누적관객수, 누적매출액, 네이버코드, 다음코드
 		String[][] mvRank = new String[10][12];
@@ -36,25 +41,13 @@ public class MovieProMain
 		// View
 		int userVal = userInterface(mvRank);
 		
-		// NaverReply Crawling
+		// Naver, Daum Reply Crawling
+		rDAO.deleteReply(mvRank[userVal-1][1]); // 수집하는 댓글의 영화가 MongoDB에 저장되어 있는 영화라면 해당 영화 댓글 우선 삭제 후 새로운 댓글 저장
 		HashMap<String, Integer> nMap = nCrawler.naverCrawler(mvRank[userVal-1][1], mvRank[userVal-1][10]);
+		HashMap<String, Integer> dMap = dCrawler.daumCrawler(mvRank[userVal-1][1], mvRank[userVal-1][11]);  
 		
 		// 4. 사용자에게 결과 출력
-		double avgNaver = (double)(nMap.get("total")) / (double)(nMap.get("cnt"));
-		DecimalFormat threeDot = new DecimalFormat("###,###");
-		
-		System.out.println("영화 제목 : "  + mvRank[userVal-1][1] + "\n");
-		System.out.println("예매율 : "        + mvRank[userVal-1][2] + "%");
-		System.out.println("장르 : "          + mvRank[userVal-1][3]);
-		System.out.println("상영 시간 : "     + mvRank[userVal-1][4]);
-		System.out.println("개봉 일자 : "     + mvRank[userVal-1][5]);
-		System.out.println("감독 : "          + mvRank[userVal-1][6]);
-		System.out.println("출연진 : "        + mvRank[userVal-1][7]);
-		System.out.println("누적 관객수 : "   + threeDot.format(Integer.parseInt(mvRank[userVal-1][8])) + "명");
-		System.out.println("누적 매출액 : "   + threeDot.format(Integer.parseInt(mvRank[userVal-1][9])) + "원");
-		System.out.println("네이버 댓글수 : " + nMap.get("cnt") + "건");
-		System.out.printf("네이버 평균 평점 : %.1f점\n",  avgNaver);
-		System.out.println("=============================================");
+		printArr(mvRank, userVal, nMap, dMap);
 	}
 	
 	
@@ -84,7 +77,7 @@ public class MovieProMain
 		}
 		System.out.println("======================================");
 		System.out.println("보고 싶은 영화 1-10 순위중 한개를 입력하세요.");
-		int userVal = 0;
+		int userVal = 0; 
 		// 유효성 체크
 		while(true)
 		{
@@ -104,25 +97,28 @@ public class MovieProMain
 		return userVal;
 	}
 	
-	// mvRank 출력하는 코드
-	public static void printArr(String[][] mvRank) 
+	// Print mvRank 
+	public static void printArr(String[][] mvRank, int userVal, HashMap<String, Integer> nMap, HashMap<String, Integer> dMap) 
 	{
-		for(int i = 0; i<mvRank.length; i++) 
-		{
-			System.out.print(mvRank[i][0] + "\t");
-			System.out.print(mvRank[i][1]+ "\t");
-			System.out.print(mvRank[i][2]+ "\t");
-			System.out.print(mvRank[i][3]+ "\t");
-			System.out.print(mvRank[i][4]+ "\t");
-			System.out.print(mvRank[i][5]+ "\t");
-			System.out.print(mvRank[i][6]+ "\t");
-			System.out.print(mvRank[i][7]+ "\t");
-			System.out.print(mvRank[i][8]+ "\t");
-			System.out.print(mvRank[i][9]+ "\t");
-			System.out.print(mvRank[i][10]+ "\t");
-			System.out.println(mvRank[i][11]);
-			System.out.println("=============================");
-		}
+		double avgNaver = (double)(nMap.get("total")) / (double)(nMap.get("cnt"));
+		double avgDaum = (double)(dMap.get("total")) / (double)(dMap.get("cnt"));
+		DecimalFormat threeDot = new DecimalFormat("###,###");
+		BigInteger money = new BigInteger(mvRank[userVal-1][9]); //문자열(String)만 가능 유효범위 무한대 수준
+		
+		System.out.println("영화 제목 : "     + mvRank[userVal-1][1] + "\n");
+		System.out.println("예매율 : "        + mvRank[userVal-1][2] + "%");
+		System.out.println("장르 : "          + mvRank[userVal-1][3]);
+		System.out.println("상영 시간 : "     + mvRank[userVal-1][4]);
+		System.out.println("개봉 일자 : "     + mvRank[userVal-1][5]);
+		System.out.println("감독 : "          + mvRank[userVal-1][6]);
+		System.out.println("출연진 : "        + mvRank[userVal-1][7]);
+		System.out.println("누적 관객수 : "   + threeDot.format(Integer.parseInt(mvRank[userVal-1][8])) + "명");
+		System.out.println("누적 매출액 : "   + threeDot.format(money) + "원");
+		System.out.println("네이버 댓글수 : " + nMap.get("cnt") + "건");
+		System.out.println("다음 댓글수 : "   + dMap.get("cnt") + "건");
+		System.out.printf("네이버 평균 평점 : %.1f점\n", avgNaver);
+		System.out.printf("다음 평균 평점 : %.1f점\n",   avgDaum);
+		System.out.println("=============================================");
 			
 	}
 	

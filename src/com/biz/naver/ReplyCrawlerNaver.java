@@ -29,8 +29,6 @@ public class ReplyCrawlerNaver
 		String checkPage = "";
 		Document doc = null;
 		Elements movieList = null;
-
-		rDAO.deleteReply(movieName); // 수집하는 댓글의 영화가 MongoDB에 저장되어 있는 영화라면 해당 영화 댓글 우선 삭제 후 새로운 댓글 저장
 		
 		while(true)
 		{
@@ -58,10 +56,10 @@ public class ReplyCrawlerNaver
 				total += score;
 				cnt++;
 				
-				System.out.println("평점 : "   + score);
-				System.out.println("작성자 : " + userID);
-				System.out.println("내용 : "   + content);
-				System.out.println("날짜 : "   + date);
+				System.out.println("[Naver] 평점 : "   + score);
+				System.out.println("[Naver] 작성자 : " + userID);
+				System.out.println("[Naver] 내용 : "   + content);
+				System.out.println("[Naver] 날짜 : "   + date);
 				System.out.println("==============================================");
 			}					
 			page++;
